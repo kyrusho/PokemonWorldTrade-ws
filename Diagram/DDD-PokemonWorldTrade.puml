@@ -1,0 +1,116 @@
+@startuml
+hide circle
+top to bottom direction
+
+!define ENTITY(entityName) class entityName << Entity >>
+!define AGGREGATE(aggregateName) class aggregateName << Aggregate >>
+!define AGGREGATE_ROOT(aggregateRootName) class aggregateRootName << Aggregate Root >>
+!define AGGREGATE_ROOT_ENTITY(aggregateRootEntityName) class aggregateRootEntityName << Aggregate Root >> << Entity >>
+!define VALUE_OBJECT(valueObjectName) class valueObjectName << Value Object >>
+!pragma useVerticalIf on
+skinparam dpi 300
+skinparam packageStyle rectangle
+skinparam rectangle {
+    BackgroundColor #mistyRose
+    BorderColor Black
+}
+rectangle "Pokemon World Trade" as BoundedContextPokemonWorldTrade #line.dotted {
+
+    Package "Pokemon Sub-Domain" <<Rectangle>> #lavenderBlush {
+
+        AGGREGATE(Pokemon) #thistle {
+            name: String
+            type: String
+            ability: String
+            weight: String
+            height: String
+            classification: String
+        }
+        VALUE_OBJECT(PokemonIdentifier) #paleVioletRed {
+           pokemonId: UUID
+        }
+        Pokemon --> PokemonIdentifier
+    }
+
+    Package "Region Sub-Domain" <<Rectangle>> #lavenderBlush {
+        ENTITY(Region) #rosyBrown{
+                regionName: String
+                professor: String
+                starterPokemons: String
+                gymLeaders: String
+                geography: String
+            }
+            VALUE_OBJECT(RegionIdentifier) #paleVioletRed {
+                       regionId: UUID
+            }
+        RegionIdentifier *-- Pokemon
+        Region --> RegionIdentifier
+    }
+
+    Package "User Sub-Domain" <<Rectangle>> #lavenderBlush {
+
+        AGGREGATE(User) #rosyBrown {
+            username: String
+            email: String
+            }
+
+        VALUE_OBJECT(UserIdentifier) #paleVioletRed{
+            userId: UUID
+        }
+
+        VALUE_OBJECT(TradeTokenIdentifier) #paleVioletRed {
+            tokenId: UUID
+        }
+
+        User --> UserIdentifier
+        UserIdentifier --> TradeTokenIdentifier
+    }
+
+    Package "Trading Sub-Domain" <<Rectangle>> #lavenderBlush {
+
+        AGGREGATE_ROOT_ENTITY(Trade) #thistle {
+            timeStamp: LocalDate
+            status: String
+        }
+
+        VALUE_OBJECT(TradeIdentifier) #paleVioletRed {
+            tradeId: UUID
+        }
+
+        ENTITY(TradingSession) #rosyBrown {
+            tradeDate: LocalDate
+            pokemonsToTradeIn: List<Pokemon>
+            acceptTrade: Boolean
+        }
+        VALUE_OBJECT(Notification) #paleVioletRed {
+                    messageType: String
+                    messageContent: String
+                    timeStamp: LocalDate
+                }
+        TradeTokenIdentifier --> TradingSession
+        Trade --> TradeIdentifier
+        Notification --> UserIdentifier
+        TradingSession <-- TradeIdentifier
+        Trade --> PokemonIdentifier
+        TradingSession --> Notification
+    }
+
+        Package "Inventory Management Sub-Domain" <<Rectangle>> #lavenderBlush {
+
+        ENTITY(Inventory) #rosyBrown {
+            availablePokemons: List<Pokemon>
+            updateDate: LocalDate
+
+        }
+        VALUE_OBJECT(InventoryIdentifier) #paleVioletRed {
+            inventoryId: UUID
+        }
+        UserIdentifier --> InventoryIdentifier
+        Inventory --> InventoryIdentifier
+        PokemonIdentifier --> Inventory
+    }
+
+
+}
+
+@enduml
