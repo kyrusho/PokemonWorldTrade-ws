@@ -32,7 +32,7 @@ rectangle "Pokemon World Trade" as BoundedContextPokemonWorldTrade #line.dotted 
         Pokemon --> PokemonIdentifier
     }
 
-    Package "Region Sub-Domain" <<Rectangle>> #lavenderBlush {
+    Package "Region Sub-Domain" <<Rectangle>> #grey {
         ENTITY(Region) #rosyBrown{
                 regionName: String
                 professor: String
@@ -43,13 +43,13 @@ rectangle "Pokemon World Trade" as BoundedContextPokemonWorldTrade #line.dotted 
             VALUE_OBJECT(RegionIdentifier) #paleVioletRed {
                        regionId: UUID
             }
-        RegionIdentifier *-- Pokemon
+        Region "1" *-- "1..*" PokemonIdentifier
         Region --> RegionIdentifier
     }
 
     Package "User Sub-Domain" <<Rectangle>> #lavenderBlush {
 
-        AGGREGATE(User) #rosyBrown {
+        AGGREGATE(User) #thistle {
             username: String
             email: String
             }
@@ -57,59 +57,74 @@ rectangle "Pokemon World Trade" as BoundedContextPokemonWorldTrade #line.dotted 
         VALUE_OBJECT(UserIdentifier) #paleVioletRed{
             userId: UUID
         }
+        ENTITY(PokemonBag) #rosyBrown {
+                    availablePokemons: List<Pokemon>
+                    updateDate: LocalDate
 
-        VALUE_OBJECT(TradeTokenIdentifier) #paleVioletRed {
-            tokenId: UUID
-        }
-
+                }
+                VALUE_OBJECT(PokemonBagIdentifier) #paleVioletRed {
+                    pokemonBagId: UUID
+                }
+        PokemonBag --> PokemonBagIdentifier
+        PokemonBagIdentifier "1..*" --* "1..*" PokemonIdentifier
+        User --* "1" PokemonBagIdentifier
         User --> UserIdentifier
-        UserIdentifier --> TradeTokenIdentifier
     }
 
     Package "Trading Sub-Domain" <<Rectangle>> #lavenderBlush {
 
-        AGGREGATE_ROOT_ENTITY(Trade) #thistle {
-            timeStamp: LocalDate
-            status: String
+        VALUE_OBJECT(TradingSessionIdentifier) #paleVioletRed {
+            tradingSessionId: UUID
         }
 
-        VALUE_OBJECT(TradeIdentifier) #paleVioletRed {
-            tradeId: UUID
-        }
-
-        ENTITY(TradingSession) #rosyBrown {
+        AGGREGATE_ROOT_ENTITY(TradingSession) #thistle {
             tradeDate: LocalDate
-            pokemonsToTradeIn: List<Pokemon>
+            pokemonsToTradeIn: PokemonBag
             acceptTrade: Boolean
+            timeStamp: LocalDate
         }
-        VALUE_OBJECT(Notification) #paleVioletRed {
+
+        VALUE_OBJECT(TradeInvitation) #paleVioletRed {
                     messageType: String
                     messageContent: String
                     timeStamp: LocalDate
                 }
-        TradeTokenIdentifier --> TradingSession
-        Trade --> TradeIdentifier
-        Notification --> UserIdentifier
-        TradingSession <-- TradeIdentifier
-        Trade --> PokemonIdentifier
-        TradingSession --> Notification
+        TradingSession --> TradingSessionIdentifier
+        TradeInvitation "1" *-- "1" UserIdentifier
+        UserIdentifier "1..*" *--* "1" TradingSession
+        TradingSession --o "1..*" PokemonIdentifier
     }
 
-        Package "Inventory Management Sub-Domain" <<Rectangle>> #lavenderBlush {
 
-        ENTITY(Inventory) #rosyBrown {
-            availablePokemons: List<Pokemon>
-            updateDate: LocalDate
+    Package "Events Sub-Domain" <<Rectangle>> #lavenderBlush {
+            ENTITY(Event) #rosyBrown {
+                eventName: String
+                eventType: String
+                eventDate: LocalDate
+                eventDescription: String
+                eventStatus: String
+            }
 
+            VALUE_OBJECT(EventIdentifier) #paleVioletRed {
+                eventId: UUID
+            }
+
+            Event --> EventIdentifier
+            Event "1" o-- "1..*" TradingSessionIdentifier
         }
-        VALUE_OBJECT(InventoryIdentifier) #paleVioletRed {
-            inventoryId: UUID
-        }
-        UserIdentifier --> InventoryIdentifier
-        Inventory --> InventoryIdentifier
-        PokemonIdentifier --> Inventory
-    }
 
+        Package "Friendship Sub-Domain" <<Rectangle>> #grey {
+            ENTITY(Friendship) #rosyBrown {
+                friendList: List<User>
+            }
+
+            VALUE_OBJECT(FriendshipIdentifier) #paleVioletRed {
+                friendshipId: UUID
+            }
+
+            Friendship --> FriendshipIdentifier
+            Friendship *-- "1..*" UserIdentifier
+        }
 
 }
 

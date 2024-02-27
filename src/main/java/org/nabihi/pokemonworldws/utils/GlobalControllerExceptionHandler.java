@@ -1,9 +1,9 @@
 package org.nabihi.pokemonworldws.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import org.nabihi.cardealershipws.utils.exceptions.InUseException;
-import org.nabihi.cardealershipws.utils.exceptions.InvalidInputException;
-import org.nabihi.cardealershipws.utils.exceptions.NotFoundException;
+import org.nabihi.pokemonworldws.utils.exceptions.InUseException;
+import org.nabihi.pokemonworldws.utils.exceptions.InvalidInputException;
+import org.nabihi.pokemonworldws.utils.exceptions.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
